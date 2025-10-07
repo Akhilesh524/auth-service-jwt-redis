@@ -7,11 +7,17 @@ const addUser = (req, res, callback) => {
   db.query(query, [name, email, password], callback); 
 };
 
+// findByEmail
+const findByEmail = (email, callback) => {
+  const sql = 'SELECT * FROM userdata WHERE email = ?';
+  db.query(sql, [email], callback);
+};
+
 
 const findUser = (id, callback) => {
   const query = 'SELECT id, name, email FROM userdata WHERE id = ?';
   db.query(query, [id], callback);  
 };
 
-module.exports = { addUser, findUser};
+module.exports = { addUser, findByEmail,findUser};
 
