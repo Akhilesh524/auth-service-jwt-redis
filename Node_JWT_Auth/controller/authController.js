@@ -1,6 +1,7 @@
 const auth = require('../models/auth');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const redisClient = require('../config/redis')
 
 // ---------------------- CREATE USER ----------------------
 const createUser = (req, res) => {
@@ -100,7 +101,26 @@ const getUser = (req, res) => {
   });
 };
 
-module.exports = { createUser, loginUser, getUser };
+
+//----------------------logoutUser---------------------------
+const logoutUser=async(req,res)=>{
+  try {
+    const token = req.token;
+    const decoded = req.user;
+
+    // Calculate remaining expiry time of JWT
+    const expiresIn = decoded.exp - Math.floor(Date.now() / 1000);
+
+    // Store token in Redis with expiry equal to remaining time
+    await redisClient.setEx(`blacklist:${token}`, expiresIn, 'true');
+
+    return res.status(200).json({ message: 'Logout successful' });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: 'Server error during logout' });
+  }
+}
+module.exports = { createUser, loginUser, getUser,logoutUser };
 
 
 
